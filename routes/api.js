@@ -98,7 +98,7 @@ router.post('/login', (req, res) => {
      })
 }) 
 
-router.get('/events', (req, res) => {
+router.get('/events',verifyToken, (req, res) => {
     let events = [ 
         {
            "_id": "1",

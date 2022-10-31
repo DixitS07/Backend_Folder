@@ -4,10 +4,14 @@ const router = express.Router();
 const User = require('../model/user')
 const mongoose = require('mongoose');
 const user = require('../model/user');
+const multer  = require('multer');
+const path = require('path');
+
 
 mongoose.connect("mongodb://127.0.0.1/StudentsDatabase", { useNewUrlParser: true }, function (err) {
     if (err) throw err; console.log('Database Successfully connected');
 });
+
 function verifyToken(req,res,next){
     if (!req.headers.authorization){
         return res.status(401).send('Unauthorized request')
@@ -23,14 +27,44 @@ function verifyToken(req,res,next){
     req.userId  = payload.subject
     next()
 }
+
+var storage = multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'uploads/')
+    },
+    filename:function(req,file,cb){
+        let ext = path.extname(file.originalname)
+        cb(null,Date.now()+ext)
+    }
+})
+var upload = multer({
+    storage:storage,
+    filefilter:function(req,file,callback){
+        if(
+            file.mimetype == "image/png" ||
+            file.mimetype == "image/jpg"
+        ){
+            callback(null,true)
+        }else{
+            console.log('only png and jpg files are supported!')
+            callback(null.false)
+        }
+    },
+    limits:{
+        fileSize: 1024*1024*3
+    }
+})
    
 router.get('/', (req, res) => {
      res.send('From API route')
 }) 
 
-router.post('/register',(req,res)=>{
+router.post('/register', upload.single('photo'),(req,res)=>{
     let userData = req.body
     let user = new User(userData)
+    if(req.file){
+        user.photo = req.file.path
+    }
     user.save((error,registeredUser)=>{
         if(error){
             console.log(error);
@@ -106,46 +140,11 @@ router.get('/events',verifyToken, (req, res) => {
     res.json(events)
 }) 
 
-router.get('/special',verifyToken, (req, res) => {
-    let events = [  
-        {
-           "_id": "1",
-           "name": "Auto Expo",
-           "description": "lorem ipsum",
-           "date": "2012-04-23t18:25:43.511Z"
-        }, 
-        {
-            "_id": "2",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        },
-        {
-            "_id": "3",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-         }, 
-         {
-            "_id": "4",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-         }, 
-         {
-            "_id": "5",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-         }, 
-         {
-            "_id": "6",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-         } 
-    ]  
-    res.json(events)
+router.get('/special',verifyToken ,(req,res)=>{
+    User.find(function (err, result) {
+        if (err) return console.error(err);
+        res.json(result);
+    })
 })
 
 module.exports = router

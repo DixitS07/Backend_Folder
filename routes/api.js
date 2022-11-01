@@ -59,17 +59,31 @@ router.get('/', (req, res) => {
      res.send('From API route')
 }) 
 
-router.post('/register', upload.single('photo'),(req,res)=>{
+router.post('/register',(req,res)=>{
     let userData = req.body
     let user = new User(userData)
-    if(req.file){
-        user.photo = req.file.path
-    }
     user.save((error,registeredUser)=>{
         if(error){
             console.log(error);
         }else{
             let payload ={subject:registeredUser._id};
+            let token = jwt.sign(payload,'secretKey');
+            res.status(200).send({token})
+        }
+    })
+
+}) 
+router.post('/student-register', (req,res)=>{
+    let studentData = req.body
+    let student = new Student(studentData)
+    // if(req.file){
+    //     student.photo = req.file.path
+    // }
+    student.save((error,registeredStudent)=>{
+        if(error){
+            console.log(error);
+        }else{
+            let payload ={subject:registeredStudent._id};
             let token = jwt.sign(payload,'secretKey');
             res.status(200).send({token})
         }

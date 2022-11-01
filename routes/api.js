@@ -2,8 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const User = require('../model/user')
+const Student = require('../model/student');
 const mongoose = require('mongoose');
-const user = require('../model/user');
 const multer  = require('multer');
 const path = require('path');
 
@@ -183,7 +183,7 @@ router.get('/special',verifyToken ,(req,res)=>{
 })
 
 router.get('/studentList',verifyToken ,(req,res)=>{
-    User.find(function (err, result) {
+    Student.find(function (err, result) {
         if (err) return console.error(err);
         res.json(result);
     })

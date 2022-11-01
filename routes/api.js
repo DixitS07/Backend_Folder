@@ -141,6 +141,47 @@ router.get('/events',verifyToken, (req, res) => {
 }) 
 
 router.get('/special',verifyToken ,(req,res)=>{
+    let events = [ 
+        {
+           "_id": "1",
+           "name": "Auto Expo",
+           "description": "lorem ipsum",
+           "date": "2012-04-23t18:25:43.511Z"
+        }, 
+        {
+            "_id": "2",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        },
+        {
+            "_id": "3",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+         }, 
+         {
+            "_id": "4",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+         }, 
+         {
+            "_id": "5",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+         }, 
+         {
+            "_id": "6",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+         } 
+    ]  
+    res.json(events)
+})
+router.get('/studentList',verifyToken ,(req,res)=>{
     User.find(function (err, result) {
         if (err) return console.error(err);
         res.json(result);

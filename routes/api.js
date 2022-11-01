@@ -181,6 +181,7 @@ router.get('/special',verifyToken ,(req,res)=>{
     ]  
     res.json(events)
 })
+
 router.get('/studentList',verifyToken ,(req,res)=>{
     User.find(function (err, result) {
         if (err) return console.error(err);

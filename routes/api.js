@@ -91,6 +91,24 @@ router.post('/student-register', (req,res)=>{
 
 }) 
 
+router.put('/updateList' ,(req,res)=>{
+    Student.findById(req.body._id ,(err, student)=>{
+        if (err) return console.error(err);  
+        student.firstName = req.body.firstName;
+        student.lastName = req.body.lastName;
+        student.age = req.body.age;
+        student.email = req.body.email;
+        student.phone = req.body.phone;
+        student.address = req.body.address;
+        student.password = req.body.password;
+        student.save((err,student)=>{
+            res.status(500).json({errmsg:err});
+            res.status(200).json({msg:student});
+        })
+    })
+
+})
+
 router.post('/login', (req, res) => {
      let userData = req.body
 
@@ -202,5 +220,8 @@ router.get('/studentList',verifyToken ,(req,res)=>{
         res.json(result);
     })
 })
+
+
+
 
 module.exports = router

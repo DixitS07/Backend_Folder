@@ -76,9 +76,6 @@ router.post('/register',(req,res)=>{
 router.post('/student-register', (req,res)=>{
     let studentData = req.body
     let student = new Student(studentData)
-    // if(req.file){
-    //     student.photo = req.file.path
-    // }
     student.save((error,registeredStudent)=>{
         if(error){
             console.log(error);
@@ -91,23 +88,6 @@ router.post('/student-register', (req,res)=>{
 
 }) 
 
-router.put('/updateList' ,(req,res)=>{
-    Student.findById(req.body._id ,(err, student)=>{
-        if (err) return console.error(err);  
-        student.firstName = req.body.firstName;
-        student.lastName = req.body.lastName;
-        student.age = req.body.age;
-        student.email = req.body.email;
-        student.phone = req.body.phone;
-        student.address = req.body.address;
-        student.password = req.body.password;
-        student.save((err,student)=>{
-            res.status(500).json({errmsg:err});
-            res.status(200).json({msg:student});
-        })
-    })
-
-})
 
 router.post('/login', (req, res) => {
      let userData = req.body
@@ -214,12 +194,46 @@ router.get('/special',verifyToken ,(req,res)=>{
     res.json(events)
 })
 
-router.get('/studentList',verifyToken ,(req,res)=>{
+router.get('/studentList' ,(req,res)=>{
     Student.find(function (err, result) {
         if (err) return console.error(err);
         res.json(result);
     })
 })
+
+// student-register'
+// router.put('/updateList' ,(req,res)=>{
+//     Student.findById(req.body._id ,(err, student)=>{
+//         if (err) return console.error(err);  
+//         student.firstName = req.body.firstName;
+//         student.lastName = req.body.lastName;
+//         student.age = req.body.age;
+//         student.email = req.body.email;
+//         student.phone = req.body.phone;
+//         student.address = req.body.address;
+//         student.password = req.body.password;
+//         student.save((error,registeredStudent)=>{
+//             if(error){
+//                 console.log(error);
+//             }else{
+//                 let payload ={subject:registeredStudent._id};
+//                 let token = jwt.sign(payload,'secretKey');
+//                 res.status(200).send({token})
+//             }
+//         })
+    
+//     })
+
+// })
+
+router.delete('/delete/:id' ,(req,res,next)=>{
+  Student.findOneAndRemove({_id : req.params.id},(err,student)=>{
+    if(err)
+     res.status(500).json({errmsg:err});
+   res.status(200).json({msg:student});
+
+  });
+});
 
 
 

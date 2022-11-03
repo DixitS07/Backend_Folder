@@ -226,14 +226,14 @@ router.get('/studentList' ,(req,res)=>{
 
 // })
 
-router.delete('/delete/:id' ,(req,res,next)=>{
-  Student.findOneAndRemove({_id : req.params.id},(err,student)=>{
-    if(err)
-     res.status(500).json({errmsg:err});
-   res.status(200).json({msg:student});
-
+router.delete('/delete' ,(req,res,next)=>{
+    Student.findOneAndRemove({_id : req.query._id},(err,student)=>{
+      if(err)
+       res.status(500).json({errmsg:err});
+     res.status(200).json({msg:student});
+  
+    });
   });
-});
 
 
 

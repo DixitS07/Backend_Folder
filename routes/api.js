@@ -61,7 +61,10 @@ router.get('/', (req, res) => {
 
 router.post('/register',(req,res)=>{
     let userData = req.body
-    let user = new User(userData)
+    let user = new User({
+        email: userData.email,
+        password:userData.password
+    })
     user.save((error,registeredUser)=>{
         if(error){
             console.log(error);
@@ -85,7 +88,7 @@ router.post('/student-register', (req,res)=>{
         }else{
             let payload ={subject:registeredStudent._id};
             let token = jwt.sign(payload,'secretKey');
-            res.status(200).send({token})
+            res.status(200).send({token,registeredStudent,student})
         }
     })
 
@@ -202,5 +205,6 @@ router.get('/studentList',verifyToken ,(req,res)=>{
         res.json(result);
     })
 })
+
 
 module.exports = router

@@ -61,7 +61,10 @@ router.get('/', (req, res) => {
 
 router.post('/register',(req,res)=>{
     let userData = req.body
-    let user = new User(userData)
+    let user = new User({
+        email: userData.email,
+        password:userData.password
+    })
     user.save((error,registeredUser)=>{
         if(error){
             console.log(error);
@@ -82,7 +85,7 @@ router.post('/student-register', (req,res)=>{
         }else{
             let payload ={subject:registeredStudent._id};
             let token = jwt.sign(payload,'secretKey');
-            res.status(200).send({token})
+            res.status(200).send({token,registeredStudent,student})
         }
     })
 
@@ -201,32 +204,34 @@ router.get('/studentList' ,(req,res)=>{
     })
 })
 
-// student-register'
-// router.put('/updateList' ,(req,res)=>{
-//     Student.findById(req.body._id ,(err, student)=>{
-//         if (err) return console.error(err);  
-//         student.firstName = req.body.firstName;
-//         student.lastName = req.body.lastName;
-//         student.age = req.body.age;
-//         student.email = req.body.email;
-//         student.phone = req.body.phone;
-//         student.address = req.body.address;
-//         student.password = req.body.password;
-//         student.save((error,registeredStudent)=>{
-//             if(error){
-//                 console.log(error);
-//             }else{
-//                 let payload ={subject:registeredStudent._id};
-//                 let token = jwt.sign(payload,'secretKey');
-//                 res.status(200).send({token})
-//             }
-//         })
+// student-register update api
+
+router.put('/student-register',(req,res) =>{
+    // console.log(req,'chetan')
+    let hero =  req.body
+    let updatevar = { 
+        firstName : hero.firstName,
+        lastName : hero.lastName,
+        age : hero.age,
+        email : hero.email,
+        phone : hero.phone,
+        address : hero.address,
+        password : hero.lpassword
+    };
+    let filter = {_id:req.query._id,};
+    console.log(filter,req.body,req.body.firstName)
+    Student.findByIdAndUpdate(filter,updatevar,(err, student)=>{
+        if(err) {return console.error(err);}  
+        res.send(student)
+        
+    })
     
-//     })
+})
 
-// })
 
-router.delete('/delete' ,(req,res,next)=>{
+router.delete('/delete', verifyToken,(req,res,next)=>{
+    // paramvar = req.query._id
+    // console.log(paramvar)
     Student.findOneAndRemove({_id : req.query._id},(err,student)=>{
       if(err)
        res.status(500).json({errmsg:err});
@@ -234,8 +239,5 @@ router.delete('/delete' ,(req,res,next)=>{
   
     });
   });
-
-
-
-
+  
 module.exports = router

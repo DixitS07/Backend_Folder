@@ -206,19 +206,21 @@ router.get('/studentList' ,(req,res)=>{
 
 // student-register update api
 
-router.put('/student-register' ,(req,res)=>{
-    let hero = ({firstName,lastname} = req.body);
+router.put('/student-register',(req,res) =>{
+    // console.log(req,'chetan')
+    let hero =  req.body
     let updatevar = { 
         firstName : hero.firstName,
         lastName : hero.lastName,
-        age : '44',
-        email : 'req@body.em',
-        phone : '3424242',
-        address : 'reqbodyaddress',
-        password : 'reqbodypassword'
+        age : hero.age,
+        email : hero.email,
+        phone : hero.phone,
+        address : hero.address,
+        password : hero.lpassword
     };
     let filter = {_id:req.query._id,};
-    Student.findOneAndUpdate(filter,{$set :updatevar},(err, student)=>{
+    console.log(filter,req.body,req.body.firstName)
+    Student.findByIdAndUpdate(filter,updatevar,(err, student)=>{
         if(err) {return console.error(err);}  
         res.send(student)
         

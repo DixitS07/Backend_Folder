@@ -204,39 +204,40 @@ router.get('/studentList' ,(req,res)=>{
     })
 })
 
-// student-register'
-// router.put('/updateList' ,(req,res)=>{
-//     Student.findById(req.body._id ,(err, student)=>{
-//         if (err) return console.error(err);  
-//         student.firstName = req.body.firstName;
-//         student.lastName = req.body.lastName;
-//         student.age = req.body.age;
-//         student.email = req.body.email;
-//         student.phone = req.body.phone;
-//         student.address = req.body.address;
-//         student.password = req.body.password;
-//         student.save((error,registeredStudent)=>{
-//             if(error){
-//                 console.log(error);
-//             }else{
-//                 let payload ={subject:registeredStudent._id};
-//                 let token = jwt.sign(payload,'secretKey');
-//                 res.status(200).send({token})
-//             }
-//         })
+// student-register update api
+
+router.put('/student-register' ,(req,res)=>{
+    let hero = ({firstName,lastname} = req.body);
+    let updatevar = { 
+        firstName : hero.firstName,
+        lastName : hero.lastName,
+        age : '44',
+        email : 'req@body.em',
+        phone : '3424242',
+        address : 'reqbodyaddress',
+        password : 'reqbodypassword'
+    };
+    let filter = {_id:req.query._id,};
+    Student.findOneAndUpdate(filter,{$set :updatevar},(err, student)=>{
+        if(err) {return console.error(err);}  
+        res.send(student)
+        
+    })
     
-//     })
+})
 
-// })
 
-router.delete('/delete/:id' ,(req,res,next)=>{
-  Student.findOneAndRemove({_id : req.params.id},(err,student)=>{
-    if(err)
-     res.status(500).json({errmsg:err});
-   res.status(200).json({msg:student});
-
+router.delete('/delete', verifyToken,(req,res,next)=>{
+    // paramvar = req.query._id
+    // console.log(paramvar)
+    Student.findOneAndRemove({_id : req.query._id},(err,student)=>{
+      if(err)
+       res.status(500).json({errmsg:err});
+     res.status(200).json({msg:student});
+  
+    });
   });
-});
+  
 
 
 

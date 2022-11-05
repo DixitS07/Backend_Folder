@@ -33,8 +33,8 @@ var storage = multer.diskStorage({
         cb(null,'uploads/')
     },
     filename:function(req,file,cb){
-        let ext = path.extname(file.originalname)
-        cb(null,Date.now()+ext)
+        // let ext = path.extname(file.originalname)
+        cb(null,Date.now()+file.originalname)
     }
 })
 var upload = multer({
@@ -53,7 +53,7 @@ var upload = multer({
     limits:{
         fileSize: 1024*1024*3
     }
-})
+}).single('photo')
    
 router.get('/', (req, res) => {
      res.send('From API route')
@@ -76,9 +76,13 @@ router.post('/register',(req,res)=>{
     })
 
 }) 
-router.post('/student-register', (req,res)=>{
+router.post('/student-register',upload, (req,res)=>{
     let studentData = req.body
+    // console.log(req.body,req.file)
     let student = new Student(studentData)
+    if(req.file){
+        student.photo = req.file.path
+    }
     student.save((error,registeredStudent)=>{
         if(error){
             console.log(error);
@@ -207,7 +211,7 @@ router.get('/studentList' ,(req,res)=>{
 // student-register update api
 
 router.put('/student-register',(req,res) =>{
-    // console.log(req,'chetan')
+    // console.log(req)
     let hero =  req.body
     let updatevar = { 
         firstName : hero.firstName,
@@ -220,7 +224,7 @@ router.put('/student-register',(req,res) =>{
     };
     let filter = {_id:req.query._id,};
     console.log(filter,req.body,req.body.firstName)
-    Student.findByIdAndUpdate(filter,updatevar,(err, student)=>{
+    Student.findByIdAndUpdate(filter,updatevar,{new:true},(err, student)=>{
         if(err) {return console.error(err);}  
         res.send(student)
         

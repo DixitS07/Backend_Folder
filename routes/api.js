@@ -8,7 +8,7 @@ const multer  = require('multer');
 const path = require('path');
 
 
-mongoose.connect("mongodb://127.0.0.1/StudentsDatabase", { useNewUrlParser: true }, function (err) {
+mongoose.connect("mongodb://localhost:27017/StudentsDatabase", { useNewUrlParser: true }, function (err) {
     if (err) throw err; console.log('Database Successfully connected');
 });
 
@@ -210,17 +210,19 @@ router.get('/studentList' ,(req,res)=>{
 
 // student-register update api
 
-router.put('/student-register',(req,res) =>{
+router.put('/student-register', verifyToken, upload,(req,res) =>{
     // console.log(req)
-    let hero =  req.body
+    let sd =  req.body
+    let sd1 = req.file
     let updatevar = { 
-        firstName : hero.firstName,
-        lastName : hero.lastName,
-        age : hero.age,
-        email : hero.email,
-        phone : hero.phone,
-        address : hero.address,
-        password : hero.lpassword
+        photo: sd1.path,
+        firstName : sd.firstName,
+        lastName : sd.lastName,
+        age : sd.age,
+        email : sd.email,
+        phone : sd.phone,
+        address : sd.address,
+        password : sd.lpassword
     };
     let filter = {_id:req.query._id,};
     console.log(filter,req.body,req.body.firstName)

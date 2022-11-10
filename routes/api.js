@@ -203,7 +203,7 @@ router.get('/special',verifyToken ,(req,res)=>{
 
 router.get('/studentList' ,(req,res)=>{
     Student.find(function (err, result) {
-        if (err) return console.error(err);
+        if (err){ return console.error(err)}
         res.json(result);
     })
 })
@@ -235,7 +235,7 @@ router.put('/student-register', verifyToken, upload,(req,res) =>{
 })
 
 
-router.delete('/delete', verifyToken,(req,res,next)=>{
+router.delete('/student-register', verifyToken,(req,res,next)=>{
     // paramvar = req.query._id
     // console.log(paramvar)
     Student.findOneAndRemove({_id : req.query._id},(err,student)=>{

@@ -61,6 +61,7 @@ var upload = multer({
 }).single('photo')
 
 var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false,lowerCaseAlphabets:false, specialChars: false });
+var currentotp;
 
 router.get('/', (req, res) => {
     res.send('From API route')
@@ -88,17 +89,18 @@ router.post('/register', (req, res) => {
 })
 router.post('/reset-password', (req, res) => {
     let userData = req.body
+    console.log(otptoken)
     User.find({ email: userData.email })
     .then(result=>{
         if(result.length){
-            sendEmail(userData.email,'OTP Verification',`your otp is ${otptoken}`,(error,res)=>{
-                if(error){
-                    console.log(error)
-                }else{
-                    console.log(res)
-                    res.status(200).send('email is sent successfully')
-                }
-            })
+            sendEmail(userData.email,'OTP Verification',`your otp is ${otptoken}`,)
+            if(sendEmail){
+                currentotp = otptoken
+                console.log(currentotp,'from current otp')
+                res.status(200).send('email is sent successfully')
+            }else{res.status(400).send("email is not sent")
+        }
+
         }else{
             res.status(404).send("user not found")
         }
@@ -109,6 +111,8 @@ router.post('/reset-password', (req, res) => {
 router.put('/register', (req, res) => {
     let userreq = req.body
     let userquery = req.query
+    if(userquery.otp === currentotp){
+    console.log(userquery.otp,currentotp)
     let filter = { email: userquery.email }
     updatevar = {
         email: userreq.email,
@@ -116,10 +120,10 @@ router.put('/register', (req, res) => {
     };
     User.findOneAndUpdate(filter, updatevar, { new: true }, (err, user) => {
         if (err) { return console.error(err); }
-        res.send(user)
+        res.status(200).send(user)
 
     })
-
+}else(res.status(400).send('otp is not valid'))
 })
 router.post('/student-register', upload, (req, res) => {
     let studentData = req.body

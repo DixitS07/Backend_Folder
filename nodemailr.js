@@ -18,8 +18,10 @@ const sendEmail = async (email,subject,text)=>{
             text:text
         });
         console.log("email sent successfully");
+        return true
     }catch(error){
         console.log(error,"email not sent");
+        return false
     }
 }
 module.exports = sendEmail;

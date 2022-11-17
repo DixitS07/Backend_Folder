@@ -60,7 +60,7 @@ var upload = multer({
     }
 }).single('photo')
 
-var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false,lowerCaseAlphabets:false, specialChars: false });
+
 var currentotp;
 
 router.get('/', (req, res) => {
@@ -91,6 +91,8 @@ router.post('/reset-password', (req, res) => {
     console.log(req.body,'chetan Sir')
     let userData = req.body
     // console.log(otptoken)
+    var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false,lowerCaseAlphabets:false, specialChars: false });
+    console.log(otptoken)
     User.find({ email: userData.email })
     .then(result=>{
         // console.log(result,"result");
@@ -98,7 +100,7 @@ router.post('/reset-password', (req, res) => {
             sendEmail(userData.email,'OTP Verification',`your otp is ${otptoken}`,)
             if(sendEmail){
                 currentotp = otptoken
-                console.log(currentotp,'from current otp')
+                // console.log(currentotp,'from current otp')
                 res.status(200).send('email is sent successfully')
             }else{res.status(400).send("email is not sent")
         }
@@ -116,7 +118,7 @@ router.put('/register', (req, res) => {
     let userreq = req.body
     let userquery = req.query
     if(userquery.otp === currentotp){
-    console.log(userquery.otp,currentotp)
+    // console.log(userquery.otp,currentotp)
     let filter = { email: userquery.email }
     updatevar = {
         email: userreq.email,

@@ -88,10 +88,12 @@ router.post('/register', (req, res) => {
     }) 
 })
 router.post('/reset-password', (req, res) => {
+    console.log(req.body,'chetan Sir')
     let userData = req.body
-    console.log(otptoken)
+    // console.log(otptoken)
     User.find({ email: userData.email })
     .then(result=>{
+        // console.log(result,"result");
         if(result.length){
             sendEmail(userData.email,'OTP Verification',`your otp is ${otptoken}`,)
             if(sendEmail){
@@ -103,12 +105,14 @@ router.post('/reset-password', (req, res) => {
 
         }else{
             res.status(404).send("user not found")
+
         }
     }) 
       
 })
 
 router.put('/register', (req, res) => {
+    console.log(req.body,req.query,'dixitbackend')
     let userreq = req.body
     let userquery = req.query
     if(userquery.otp === currentotp){

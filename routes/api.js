@@ -9,6 +9,8 @@ const path = require('path');
 // const nodemailr = require('nodemailer')
 const sendEmail = require('../nodemailr')
 const otpGenerator = require('otp-generator')
+const passport = require('passport')
+const session = require('express-session')
 
 
 
@@ -168,7 +170,7 @@ router.post('/login', (req, res) => {
 })
 
 
-router.get('/events', verifyToken, (req, res) => {
+router.get('/fbevents',(req, res) => {
     let events = [
         {
             "_id": "1",
@@ -208,7 +210,55 @@ router.get('/events', verifyToken, (req, res) => {
         }
     ]
     res.json(events)
+    // res.send(req.user)
 })
+router.get('/events', verifyToken,(req, res) => {
+    let events = [
+        {
+            "_id": "1",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        },
+        {
+            "_id": "2",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        },
+        {
+            "_id": "3",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        },
+        {
+            "_id": "4",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        },
+        {
+            "_id": "5",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        },
+        {
+            "_id": "6",
+            "name": "Auto Expo",
+            "description": "lorem ipsum",
+            "date": "2012-04-23t18:25:43.511Z"
+        }
+    ]
+    res.json(events)
+    // res.send(req.user)
+})
+function isLoggedIn(req,res,next){
+    if(req.isAuthanticated())
+    return next()
+    res.redirect('/')
+}
 
 router.get('/special', verifyToken, (req, res) => {
     let events = [

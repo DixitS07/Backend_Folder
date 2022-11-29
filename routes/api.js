@@ -17,6 +17,8 @@ mongoose.connect("mongodb://localhost:27017/StudentsDatabase", { useNewUrlParser
     if (err) throw err; console.log('Database Successfully connected');
 });
 
+
+
 function verifyToken(req, res, next) {
     if (!req.headers.authorization) {
         return res.status(401).send('Unauthorized request')
@@ -61,6 +63,10 @@ var upload = multer({
 }).single('photo')
 
 
+
+
+
+
 var currentotp;
 
 router.get('/', (req, res) => {
@@ -88,11 +94,14 @@ router.post('/register', (req, res) => {
     }) 
 })
 router.post('/reset-password', (req, res) => {
+    console.log(req.body,'chetan Sir')
     let userData = req.body
+    // console.log(otptoken)
     var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false,lowerCaseAlphabets:false, specialChars: false });
     console.log(otptoken)
     User.find({ email: userData.email })
     .then(result=>{
+        // console.log(result,"result");
         if(result.length){
             sendEmail(userData.email,'OTP Verification',`your otp is ${otptoken}`,)
             if(sendEmail){
@@ -104,12 +113,14 @@ router.post('/reset-password', (req, res) => {
 
         }else{
             res.status(404).send("user not found")
+
         }
     }) 
-
+      
 })
 
 router.put('/register', (req, res) => {
+    console.log(req.body,req.query,'dixitbackend')
     let userreq = req.body
     let userquery = req.query
     if(userquery.otp === currentotp){
@@ -127,11 +138,13 @@ router.put('/register', (req, res) => {
 }else(res.status(400).send('otp is not valid'))
 })
 router.post('/student-register', upload, (req, res) => {
+    const url = req.protocol + '://' + req.get("host");
     let studentData = req.body
     // console.log(req.body,req.file)
     let student = new Student(studentData)
     if (req.file) {
-        student.photo = req.file.path
+        // student.photo = req.file.path
+        student.photo = url + '/' + req.file.filename
     }
     student.save((error, registeredStudent) => {
         if (error) {
@@ -144,6 +157,7 @@ router.post('/student-register', upload, (req, res) => {
     })
 
 })
+
 
 
 router.post('/login', (req, res) => {

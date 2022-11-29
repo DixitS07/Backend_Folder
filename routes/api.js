@@ -11,7 +11,7 @@ const sendEmail = require('../nodemailr')
 const otpGenerator = require('otp-generator')
 const passport = require('passport')
 const session = require('express-session')
-
+const bcrypt = require('bcrypt')
 
 
 
@@ -170,7 +170,7 @@ router.post('/login', (req, res) => {
 })
 
 
-router.get('/fbevents',(req, res) => {
+router.get('/fbevents',isLoggedIn,(req, res) => {
     let events = [
         {
             "_id": "1",

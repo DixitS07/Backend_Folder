@@ -64,17 +64,9 @@ var upload = multer({
     }
 }).single('photo')
 
-
-
-
-
-
 var currentotp;
 var founduser;
 
-router.get('/', (req, res) => {
-    res.send('From API route')
-})
 async function genHash(req, res, next) {
     try {
         const salt = await bcrypt.genSalt(10)
@@ -86,32 +78,9 @@ async function genHash(req, res, next) {
         next(error)
     }
 }
-// async function matchHash(req,res,next){
-//     User.findOne({ email: req.body.email }, (error, user) => {
-//         if (error) {
-//             console.log(error)
-//         } else {
-//             if (!user) {
-//                 res.status(401).send('Invalid email')
-//             } else
-//                 if (user.password !== userData.password) {
-//                     res.status(401).send('Invalid password')
-//                 } else {
-//                     let payload = { subject: user._id }
-//                     let token = jwt.sign(payload, 'secretKey')
-//                     res.status(200).send({ token })
-//                 }
-//         }
-//     })
-//     try{
-//         const hash = await bcrypt.compare(req.body.password,) 
-//         req.body.password = hash
-//         next()
-//     }
-//     catch(error){
-//          next(error)
-//     }
-// }
+router.get('/', (req, res) => {
+    res.send('From API route')
+})
 
 router.post('/register', genHash, (req, res) => {
     let userData = req.body
@@ -225,51 +194,8 @@ router.post('/student-register', upload, (req, res) => {
 
 })
 
-
-
-
-
-router.get('/fbevents', isLoggedIn, (req, res) => {
-    let events = [
-        {
-            "_id": "1",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        },
-        {
-            "_id": "2",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        },
-        {
-            "_id": "3",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        },
-        {
-            "_id": "4",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        },
-        {
-            "_id": "5",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        },
-        {
-            "_id": "6",
-            "name": "Auto Expo",
-            "description": "lorem ipsum",
-            "date": "2012-04-23t18:25:43.511Z"
-        }
-    ]
-    res.json(events)
-    // res.send(req.user)
+router.get('/fbregister',  (profile) => {
+    res.render('views/facebook.html')
 })
 router.get('/events', verifyToken, (req, res) => {
     let events = [
@@ -313,11 +239,6 @@ router.get('/events', verifyToken, (req, res) => {
     res.json(events)
     // res.send(req.user)
 })
-function isLoggedIn(req, res, next) {
-    if (req.isAuthanticated())
-        return next()
-    res.redirect('/')
-}
 
 router.get('/special', verifyToken, (req, res) => {
     let events = [

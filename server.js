@@ -34,7 +34,7 @@ passport.use(new FacebookStategy({
     clientID:"529729785398057",
     clientSecret:"817efd8dc6e0299fe8d31db6920803fd",
     callbackURL:"http://localhost:3000/facebook/callback",
-    profileFields:['id','displayName','name','gender']
+    profileFields:['id','displayName','name','gender','email']
 },function(accessToken,refreshToken,profile,done){
     console.log(accessToken,refreshToken,profile)
     // const user = {}
@@ -53,11 +53,11 @@ passport.deserializeUser(function(id,done){
 app.get('/auth/facebook',passport.authenticate('facebook',{scope:'email'}),(req,res)=>{
     console.log(req,res)
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.status(200).send('response from facebook')
+    res.status(200).send('facebook.html')
 })
 
 app.get('/facebook/callback',passport.authenticate('facebook',{
-    successRedirect:'/api/fbevents',
+    successRedirect:'/api/fbregister',
     failureRedirect:'/api/login'
 }))
 app.get('/logout',(req,res)=>{

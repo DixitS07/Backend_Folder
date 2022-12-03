@@ -205,6 +205,7 @@ router.put('/register', (req, res) => {
     } else (res.status(400).send('otp is not valid'))
 })
 router.post('/student-register', upload, (req, res) => {
+    console.log(req.headers.token,'chetan_userss')
     const url = req.protocol + '://' + req.get("host");
     let studentData = req.body
     // console.log(req.body,req.file)

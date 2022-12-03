@@ -23,19 +23,28 @@ mongoose.connect("mongodb://localhost:27017/StudentsDatabase", { useNewUrlParser
 
 function verifyToken(req, res, next) {
     if (!req.headers.authorization) {
-        return res.status(401).send('Unauthorized request')
+        return res.status(403).send('Forbidden')
     }
     let token = req.headers.authorization.split(' ')[1];
     if (token == 'null') {
-        return res.status(401).send('Unauthorized request')
+        return res.status(403).send('Forbidden')
     }
     let payload = jwt.verify(token, 'secretKey')
     if (!payload) {
         return res.status(401).send('Unauthorized request')
     }
     req.userId = payload.subject
+    console.log(req.userId,'from first verify')
+    currentUser = req.userId
     next()
 }
+
+
+// function isLoggedIn(req,res,next){
+//     if(req.isAuthanticated)
+//         return next()
+//     res.redirect('/')
+// }
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -65,6 +74,7 @@ var upload = multer({
 }).single('photo')
 
 var currentotp;
+var currentUser;
 var founduser;
 
 async function genHash(req, res, next) {
@@ -95,9 +105,10 @@ router.post('/register', genHash, (req, res) => {
                     if (error) {
                         console.log(error);
                     } else {
+                        uname = registeredUser.username
                         let payload = { subject: registeredUser._id };
-                        let token = jwt.sign(payload, 'secretKey');
-                        res.status(200).send({ token })
+                        let token = jwt.sign(payload, 'secretKey',{expiresIn:'2h'});
+                        res.status(200).send({ token ,uname})
                     }
                 })
             }
@@ -120,7 +131,7 @@ router.post('/login', (req, res) => {
             console.log(match)
             if (match) {
                 let payload = { subject: user._id }
-                let token = jwt.sign(payload, 'secretKey')
+                let token = jwt.sign(payload, 'secretKey',{expiresIn:'3600s'})
                 res.status(200).send({ token })
             } else {
                 res.status(401).send('Invalid password')
@@ -173,29 +184,25 @@ router.put('/register', (req, res) => {
         })
     } else (res.status(400).send('otp is not valid'))
 })
-router.post('/student-register', upload, (req, res) => {
+router.post('/student-register',verifyToken, upload, (req, res) => {
     const url = req.protocol + '://' + req.get("host");
     let studentData = req.body
     // console.log(req.body,req.file)
-    let student = new Student(studentData)
+    let newstudent = new Student(studentData)
     if (req.file) {
         // student.photo = req.file.path
-        student.photo = url + '/' + req.file.filename
+        newstudent.photo = url + '/' + req.file.filename
     }
-    student.save((error, registeredStudent) => {
-        if (error) {
-            console.log(error);
-        } else {
-            let payload = { subject: registeredStudent._id };
-            let token = jwt.sign(payload, 'secretKey');
-            res.status(200).send({ token, registeredStudent, student })
-        }
-    })
+    newstudent.userId = currentUser
+    newstudent.save()
 
 })
 
-router.get('/fbregister',  (profile) => {
-    res.render('views/facebook.html')
+router.get('/fbregister',  (req,res) => {
+    res.render('views/facebook.ejs',{
+        user:req.user
+})
+// console.log(req.user,req.profile)
 })
 router.get('/events', verifyToken, (req, res) => {
     let events = [
@@ -240,7 +247,7 @@ router.get('/events', verifyToken, (req, res) => {
     // res.send(req.user)
 })
 
-router.get('/special', verifyToken, (req, res) => {
+router.get('/special', verifyToken,(req, res) => {
     let events = [
         {
             "_id": "1",
@@ -282,10 +289,11 @@ router.get('/special', verifyToken, (req, res) => {
     res.json(events)
 })
 
-router.get('/studentList', (req, res) => {
+router.get('/studentList', verifyToken,(req, res) => {
     Student.find(function (err, result) {
         if (err) { return console.error(err) }
-        res.json(result);
+        res.json(result.filter(result=>result.userId===currentUser));
+        // console.log(result)
     })
 })
 

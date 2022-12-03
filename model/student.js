@@ -9,7 +9,8 @@ const studentSchema = new Schema({
      "email": String,
      "phone":Number,
      "address":String,
-     "password":String
+     "password":String,
+     "userId":String
     
 })
 

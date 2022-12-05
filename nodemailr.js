@@ -8,11 +8,11 @@ const sendEmail = async (email,subject,text)=>{
             port: 587,
             auth: {
                 user: 'connectquizly@gmail.com',
-                pass: 'atdqixtqytrtwwpy'
+                pass: 'qdtahmzkmxhdukif'
             }
         });
         await transporter.sendMail({
-            from:"connectquizly@gmail.com",
+            from:'connectquizly@gmail.com',
             to:email,
             subject:subject,
             text:text

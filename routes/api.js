@@ -107,7 +107,7 @@ router.post('/register', genHash, (req, res) => {
                     } else {
                         uname = registeredUser.username
                         let payload = { subject: registeredUser._id };
-                        let token = jwt.sign(payload, 'secretKey',{expiresIn:'2h'});
+                        let token = jwt.sign(payload, 'secretKey',{expiresIn:'3600s'});
                         res.status(200).send({ token ,uname})
                     }
                 })

@@ -34,7 +34,7 @@ function verifyToken(req, res, next) {
         return res.status(401).send('Unauthorized request')
     }
     req.userId = payload.subject
-    console.log(req.userId,'from first verify')
+    // console.log(req.userId,'from first verify')
     currentUser = req.userId
     next()
 }
@@ -91,16 +91,19 @@ async function genHash(req, res, next) {
 router.get('/', (req, res) => {
     res.send('From API route')
 })
-
+ 
 router.post('/register', genHash, (req, res) => {
     let userData = req.body
+    let userquery = req.query
     console.log(userData)
+    
     let newuser = new User(userData)
     User.find({ email: userData.email })
         .then(result => {
             if (result.length) {
                 res.status(401).send('user already exists')
-            } else {
+            } else { 
+             if (userData.otp === currentotp) {
                 newuser.save((error, registeredUser) => {
                     if (error) {
                         console.log(error);
@@ -110,10 +113,30 @@ router.post('/register', genHash, (req, res) => {
                         let token = jwt.sign(payload, 'secretKey',{expiresIn:'3600s'});
                         res.status(200).send({ token ,uname})
                     }
-                })
+                }
+            )
+             }
             }
         })
 })
+
+function otpverify(req,res,next){
+    let userData = req.body
+    console.log(userData,userData.email)
+    var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
+    // console.log(otptoken)
+    sendEmail(userData.email, 'OTP Verification', `your otp is ${otptoken}`,)
+    if (sendEmail) {
+        currentotp = otptoken
+        console.log(currentotp,'from current otp')
+        res.status(200).send('email is sent successfully')
+        next()
+    } else {
+        res.status(400).send("email is not sent")
+        next()
+    }
+}
+router.post('/otpverify',otpverify)
 
 router.post('/login', (req, res) => {
     let userData = req.body
@@ -130,9 +153,10 @@ router.post('/login', (req, res) => {
             const match = await bcrypt.compare(userData.password,founduser.password)
             console.log(match)
             if (match) {
+                uname = user.username
                 let payload = { subject: user._id }
                 let token = jwt.sign(payload, 'secretKey',{expiresIn:'3600s'})
-                res.status(200).send({ token })
+                res.status(200).send({ token,uname })
             } else {
                 res.status(401).send('Invalid password')
             }
@@ -194,7 +218,13 @@ router.post('/student-register',verifyToken, upload, (req, res) => {
         newstudent.photo = url + '/' + req.file.filename
     }
     newstudent.userId = currentUser
-    newstudent.save()
+    newstudent.save((error, registeredUser) => {
+        if (error) {
+            console.log(error);
+        } else {
+            res.status(200).send(registeredUser)
+        }
+    })
 
 })
 

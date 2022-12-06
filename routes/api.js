@@ -34,8 +34,8 @@ function verifyToken(req, res, next) {
         return res.status(401).send('Unauthorized request')
     }
     req.userId = payload.subject
-    // console.log(req.userId,'from first verify')
     currentUser = req.userId
+    console.log(currentUser,'from first verify')
     next()
 }
 
@@ -75,7 +75,6 @@ var upload = multer({
 
 var currentotp;
 var currentUser;
-var founduser;
 
 async function genHash(req, res, next) {
     try {
@@ -91,44 +90,16 @@ async function genHash(req, res, next) {
 router.get('/', (req, res) => {
     res.send('From API route')
 })
- 
-router.post('/register', genHash, (req, res) => {
-    let userData = req.body
-    let userquery = req.query
-    console.log(userData)
-    
-    let newuser = new User(userData)
-    User.find({ email: userData.email })
-        .then(result => {
-            if (result.length) {
-                res.status(401).send('user already exists')
-            } else { 
-             if (userData.otp === currentotp) {
-                newuser.save((error, registeredUser) => {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        uname = registeredUser.username
-                        let payload = { subject: registeredUser._id };
-                        let token = jwt.sign(payload, 'secretKey',{expiresIn:'3600s'});
-                        res.status(200).send({ token ,uname})
-                    }
-                }
-            )
-             }
-            }
-        })
-})
 
-function otpverify(req,res,next){
+function otpverify(req, res, next) {
     let userData = req.body
-    console.log(userData,userData.email)
+    console.log(userData, userData.email)
     var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
     // console.log(otptoken)
     sendEmail(userData.email, 'OTP Verification', `your otp is ${otptoken}`,)
     if (sendEmail) {
         currentotp = otptoken
-        console.log(currentotp,'from current otp')
+        console.log(currentotp, 'from current otp')
         res.status(200).send('email is sent successfully')
         next()
     } else {
@@ -136,38 +107,67 @@ function otpverify(req,res,next){
         next()
     }
 }
-router.post('/otpverify',otpverify)
+
+router.post('/otpverify', otpverify)
+
+router.post('/register', genHash, (req, res) => {
+    let userData = req.body
+    let userquery = req.query
+
+    let newuser = new User(userData)
+    User.find({ email: userData.email })
+        .then(result => {
+            if (result.length) {
+                res.status(401).send('user already exists')
+            } else {
+                if (userData.otp === currentotp) {
+                    newuser.save((error, registeredUser) => {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(registeredUser)
+                            uname = registeredUser.username
+                            let payload = { subject: registeredUser._id };
+                            let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' });
+                            res.status(200).send({ token, uname })
+                        }
+                    }
+                    )
+                }
+            }
+        })
+})
 
 router.post('/login', (req, res) => {
     let userData = req.body
     console.log(userData)
-    User.findOne({ email: userData.email }, async function(error, user){
+    User.findOne({ email: userData.email }, async function (error, user) {
         if (error) {
             console.log(error)
         } else {
             if (!user) {
-                res.status(401).send('Invalid email')
-            } else
-            founduser= user
-            console.log(founduser)
-            const match = await bcrypt.compare(userData.password,founduser.password)
-            console.log(match)
-            if (match) {
-                uname = user.username
-                let payload = { subject: user._id }
-                let token = jwt.sign(payload, 'secretKey',{expiresIn:'3600s'})
-                res.status(200).send({ token,uname })
+                return res.status(401).send('Invalid email')
             } else {
-                res.status(401).send('Invalid password')
+                console.log(user)
+                const match = await bcrypt.compare(userData.password, user.password)
+                console.log(match)
+                if (match) {
+                    uname = user.username
+                    let payload = { subject: user._id }
+                    let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' })
+                    res.status(200).send({ token, uname })
+                } else {
+                    res.status(401).send('Invalid password')
+                }
             }
         }
     })
-    
+
 
 })
 
 router.post('/reset-password', (req, res) => {
-    console.log(req.body,'chetan Sir')
+    console.log(req.body, 'chetan Sir')
     let userData = req.body
     var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
     console.log(otptoken)
@@ -191,11 +191,10 @@ router.post('/reset-password', (req, res) => {
 })
 
 router.put('/register', (req, res) => {
-    console.log(req.body,req.query,'dixitbackend')
+    console.log(req.body, req.query, 'dixitbackend')
     let userreq = req.body
     let userquery = req.query
     if (userquery.otp === currentotp) {
-        // console.log(userquery.otp,currentotp)
         let filter = { email: userquery.email }
         updatevar = {
             email: userreq.email,
@@ -208,7 +207,7 @@ router.put('/register', (req, res) => {
         })
     } else (res.status(400).send('otp is not valid'))
 })
-router.post('/student-register',verifyToken, upload, (req, res) => {
+router.post('/student-register', verifyToken, upload, (req, res) => {
     const url = req.protocol + '://' + req.get("host");
     let studentData = req.body
     // console.log(req.body,req.file)
@@ -228,11 +227,11 @@ router.post('/student-register',verifyToken, upload, (req, res) => {
 
 })
 
-router.get('/fbregister',  (req,res) => {
-    res.render('views/facebook.ejs',{
-        user:req.user
-})
-// console.log(req.user,req.profile)
+router.get('/fbregister', (req, res) => {
+    res.render('views/facebook.ejs', {
+        user: req.user
+    })
+    // console.log(req.user,req.profile)
 })
 router.get('/events', verifyToken, (req, res) => {
     let events = [
@@ -277,7 +276,7 @@ router.get('/events', verifyToken, (req, res) => {
     // res.send(req.user)
 })
 
-router.get('/special', verifyToken,(req, res) => {
+router.get('/special', verifyToken, (req, res) => {
     let events = [
         {
             "_id": "1",
@@ -319,10 +318,10 @@ router.get('/special', verifyToken,(req, res) => {
     res.json(events)
 })
 
-router.get('/studentList', verifyToken,(req, res) => {
+router.get('/studentList', verifyToken, (req, res) => {
     Student.find(function (err, result) {
         if (err) { return console.error(err) }
-        res.json(result.filter(result=>result.userId===currentUser));
+        res.json(result.filter(result => result.userId === currentUser));
         // console.log(result)
     })
 })
@@ -364,5 +363,41 @@ router.delete('/student-register', verifyToken, (req, res, next) => {
 
     });
 });
+
+
+router.post('/deleteAccount', verifyToken, async (req, res) => {
+    userData = req.body;
+    if (!userData.password) {
+        return res.status(400).json({ message: "please enter password" })
+    }
+    User.findOne({ _id: currentUser}, async (error, user) => {
+        if (error) console.log(error)
+        else {
+            console.log(userData.password, user.password)
+            const isMatch = await bcrypt.compare(userData.password, user.password)
+            console.log(isMatch)
+            if (!isMatch) {
+                res.status(400).json({ message: "Invalid Password" })
+                next()
+            } else {
+                User.deleteOne({ _id: user._id }, (err, docs) => {
+                    if (err) console.log(err)
+                    else {
+                        res.status(200).json({ message: "user have been deleted successfully.." })
+                        console.log(docs)
+                    }
+                });
+                Student.deleteMany({ userId: user._id }, (err, docs) => {
+                    if (err) console.log(err)
+                    else {
+                        res.status(200).json({ message: "user data have been deleted successfully.." })
+                        console.log(docs)
+                        next()
+                    }
+                })
+            }
+        }
+    })
+})
 
 module.exports = router

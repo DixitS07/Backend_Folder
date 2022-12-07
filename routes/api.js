@@ -34,7 +34,7 @@ function verifyToken(req, res, next) {
         return res.status(401).send('Unauthorized request')
     }
     req.userId = payload.subject
-    currentUser = req.userId
+    currentUser = req. userId
     console.log(currentUser,'from first verify')
     next()
 }
@@ -352,7 +352,6 @@ router.put('/student-register', verifyToken, upload, (req, res) => {
 
 })
 
-
 router.delete('/student-register', verifyToken, (req, res, next) => {
     // paramvar = req.query._id
     // console.log(paramvar)
@@ -365,20 +364,20 @@ router.delete('/student-register', verifyToken, (req, res, next) => {
 });
 
 
-router.post('/deleteAccount', verifyToken, async (req, res) => {
+router.post('/deleteAccount', verifyToken, (req, res) => {
     userData = req.body;
-    if (!userData.password) {
-        return res.status(400).json({ message: "please enter password" })
-    }
+    // if (!userData.password) {
+    //     return res.status(400).json({ message: "please enter password" })
+    // }
     User.findOne({ _id: currentUser}, async (error, user) => {
         if (error) console.log(error)
         else {
             console.log(userData.password, user.password)
-            const isMatch = await bcrypt.compare(userData.password, user.password)
+            const isMatch = await bcrypt.compare(userData.password, user.password) 
             console.log(isMatch)
             if (!isMatch) {
                 res.status(400).json({ message: "Invalid Password" })
-                next()
+ 
             } else {
                 User.deleteOne({ _id: user._id }, (err, docs) => {
                     if (err) console.log(err)
@@ -389,11 +388,7 @@ router.post('/deleteAccount', verifyToken, async (req, res) => {
                 });
                 Student.deleteMany({ userId: user._id }, (err, docs) => {
                     if (err) console.log(err)
-                    else {
-                        res.status(200).json({ message: "user data have been deleted successfully.." })
-                        console.log(docs)
-                        next()
-                    }
+                    console.log(docs)
                 })
             }
         }

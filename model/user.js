@@ -7,7 +7,6 @@ const userSchema = new Schema({
      "photo":String,
      "firstName":String,
      "lastName":String,
-     "username":String,
      "email": String, 
      "password":String
 })
@@ -22,4 +21,4 @@ const userSchema = new Schema({
 //           next(error)
 //      }
 // })
-module.exports = mongoose.model('user', userSchema, 'users')
+module.exports = mongoose.model('user', userSchema, 'users') 

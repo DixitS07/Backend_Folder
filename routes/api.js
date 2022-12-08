@@ -60,9 +60,6 @@ var upload = multer({
             console.log('only png and jpg files are supported!')
             callback(null.false)
         }
-    },
-    limits: {
-        fileSize: 1024 * 1024 * 3
     }
 }).single('photo')
 
@@ -71,6 +68,7 @@ var currentUser;
 
 async function genHash(req, res, next) {
     try {
+        console.log(req.body)
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(req.body.password, salt)
         req.body.password = hash
@@ -99,29 +97,31 @@ function otpverify(req, res, next) {
         res.status(400).send("email is not sent")
         next()
     }
-}
+} 
 
 router.post('/otpverify', otpverify)
 
-router.post('/register', genHash, (req, res) => {
+router.post('/register',upload, genHash,  (req, res) => {
     let userData = req.body
+    console.log(userData,req.file,'body')
     let userquery = req.query
     const url = req.protocol + '://' + req.get("host");
     let newuser = new User(userData)
     if (req.file) {
         newuser.photo = url + '/' + req.file.filename
     }
+
     User.find({ email: userData.email })
         .then(result => {
             if (result.length) {
                 res.status(401).send('user already exists')
-            } else {
+            } else {    
                 if (userData.otp === currentotp) {
                     newuser.save((error, registeredUser) => {
                         if (error) {
                             console.log(error);
                         } else {
-                            console.log(registeredUser)
+                            console.log(registeredUser,'saved user')
                             uname = registeredUser.username
                             let payload = { subject: registeredUser._id };
                             let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' });

@@ -7,7 +7,7 @@ const userSchema = new Schema({
      "photo":String,
      "firstName":String,
      "lastName":String,
-     "username":String,
+     // "username":String,
      "email": String, 
      "password":String
 })

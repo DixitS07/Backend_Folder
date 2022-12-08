@@ -39,13 +39,6 @@ function verifyToken(req, res, next) {
     next()
 }
 
-
-// function isLoggedIn(req,res,next){
-//     if(req.isAuthanticated)
-//         return next()
-//     res.redirect('/')
-// }
-
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/')
@@ -113,8 +106,11 @@ router.post('/otpverify', otpverify)
 router.post('/register', genHash, (req, res) => {
     let userData = req.body
     let userquery = req.query
-
+    const url = req.protocol + '://' + req.get("host");
     let newuser = new User(userData)
+    if (req.file) {
+        newuser.photo = url + '/' + req.file.filename
+    }
     User.find({ email: userData.email })
         .then(result => {
             if (result.length) {
@@ -129,7 +125,7 @@ router.post('/register', genHash, (req, res) => {
                             uname = registeredUser.username
                             let payload = { subject: registeredUser._id };
                             let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' });
-                            res.status(200).send({ token, uname })
+                            res.status(200).send({ token,registeredUser }) 
                         }
                     }
                     )
@@ -205,7 +201,9 @@ router.put('/register', (req, res) => {
             res.status(200).send(user)
 
         })
-    } else (res.status(400).send('otp is not valid'))
+    } else {
+        (res.status(400).send('otp is not valid'))
+    }
 })
 router.post('/student-register', verifyToken, upload, (req, res) => {
     const url = req.protocol + '://' + req.get("host");
@@ -329,21 +327,23 @@ router.get('/studentList', verifyToken, (req, res) => {
 // student-register update api
 
 router.put('/student-register', verifyToken, upload, (req, res) => {
-    // console.log(req)
     let sd = req.body
-    let sd1 = req.file
+    const url = req.protocol + '://' + req.get("host");
+    
     let updatevar = {
-        photo: sd1.path,
         firstName: sd.firstName,
         lastName: sd.lastName,
         age: sd.age,
         email: sd.email,
         phone: sd.phone,
         address: sd.address,
-        password: sd.lpassword
+        password: sd.password
     };
+    if (req.file) {
+        updatevar.photo = url + '/' + req.file.filename
+    }
     let filter = { _id: req.query._id, };
-    console.log(filter, req.body, req.body.firstName)
+    // console.log(filter, req.body, req.body.firstName)
     Student.findByIdAndUpdate(filter, updatevar, { new: true }, (err, student) => {
         if (err) { return console.error(err); }
         res.send(student)

@@ -103,14 +103,13 @@ router.post('/otpverify', otpverify)
 
 router.post('/register',upload, genHash,  (req, res) => {
     let userData = req.body
-    console.log(userData,req.file,'body')
+    // console.log(userData,req.file,'body')
     let userquery = req.query
     const url = req.protocol + '://' + req.get("host");
     let newuser = new User(userData)
     if (req.file) {
         newuser.photo = url + '/' + req.file.filename
     }
-
     User.find({ email: userData.email })
         .then(result => {
             if (result.length) {
@@ -136,7 +135,7 @@ router.post('/register',upload, genHash,  (req, res) => {
 
 router.post('/login', (req, res) => {
     let userData = req.body
-    console.log(userData)
+    // console.log(userData)
     User.findOne({ email: userData.email }, async function (error, user) {
         if (error) {
             console.log(error)
@@ -148,10 +147,9 @@ router.post('/login', (req, res) => {
                 const match = await bcrypt.compare(userData.password, user.password)
                 console.log(match)
                 if (match) {
-                    uname = user.username
                     let payload = { subject: user._id }
                     let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' })
-                    res.status(200).send({ token, uname })
+                    res.status(200).send({ token, user })
                 } else {
                     res.status(401).send('Invalid password')
                 }
@@ -321,6 +319,13 @@ router.get('/studentList', verifyToken, (req, res) => {
         if (err) { return console.error(err) }
         res.json(result.filter(result => result.userId === currentUser));
         // console.log(result)
+    })
+})
+router.get('/userDetails', verifyToken, (req, res) => {
+    User.findOne({_id:currentUser}, (err, result) =>{
+        if (err) { return console.error(err) }
+        console.log(result,'user details')
+        res.json(result);
     })
 })
 

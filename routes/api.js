@@ -324,11 +324,29 @@ router.get('/studentList', verifyToken, (req, res) => {
 router.get('/userDetails', verifyToken, (req, res) => {
     User.findOne({_id:currentUser}, (err, result) =>{
         if (err) { return console.error(err) }
-        console.log(result,'user details')
+        // console.log(result,'user details')
         res.json(result);
     })
 })
 
+router.put('/userDetails',verifyToken, upload, (req, res) => {
+    let sd = req.body
+    const url = req.protocol + '://' + req.get("host");
+    
+    let updatevar = {
+        firstName: sd.firstName,
+        lastName: sd.lastName,
+    };
+    if (req.file) {
+        updatevar.photo = url + '/' + req.file.filename
+    }
+    // console.log(filter, req.body, req.body.firstName)
+    User.findByIdAndUpdate({ _id:currentUser }, updatevar, { new: true }, (err, user) => {
+        if (err) { return console.error(err); }
+        res.send(user)
+    })
+
+})
 // student-register update api
 
 router.put('/student-register', verifyToken, upload, (req, res) => {
@@ -399,5 +417,7 @@ router.post('/deleteAccount', verifyToken, (req, res) => {
         }
     })
 })
+
+
 
 module.exports = router

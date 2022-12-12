@@ -122,12 +122,15 @@ router.post('/register',upload, genHash,  (req, res) => {
                         } else {
                             console.log(registeredUser,'saved user')
                             uname = registeredUser.username
+                            let message = "User registered Succesfully"
                             let payload = { subject: registeredUser._id };
                             let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' });
-                            res.status(200).send({ token,registeredUser }) 
+                            res.status(200).send({ token,registeredUser, message }) 
                         }
                     }
                     )
+                }else{
+                    res.status(401).send({message:'otp is invalid'})
                 }
             }
         })
@@ -140,18 +143,19 @@ router.post('/login', (req, res) => {
         if (error) {
             console.log(error)
         } else {
-            if (!user) {
-                return res.status(401).send('Invalid email')
+            if (!user) { 
+                return res.status(401).send({message:'Invalid email'})
             } else {
                 console.log(user)
                 const match = await bcrypt.compare(userData.password, user.password)
                 console.log(match)
                 if (match) {
+                    let message = 'Login Successfull' 
                     let payload = { subject: user._id }
                     let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' })
-                    res.status(200).send({ token, user })
+                    res.status(200).send({ token, user, message })
                 } else {
-                    res.status(401).send('Invalid password')
+                    res.status(401).send({message:'Login Failed! Invalid Password'})
                 }
             }
         }
@@ -172,20 +176,20 @@ router.post('/reset-password', (req, res) => {
                 if (sendEmail) {
                     currentotp = otptoken
                     // console.log(currentotp,'from current otp')
-                    res.status(200).send('email is sent successfully')
+                    res.status(200).send({message:'email is sent successfully'})
                 } else {
-                    res.status(400).send("email is not sent")
+                    res.status(400).send({message:"email is not sent"})
                 }
 
             } else {
-                res.status(404).send("user not found")
+                res.status(404).send({message:"user not found"})
             }
         })
 
 })
 
 router.put('/register', (req, res) => {
-    console.log(req.body, req.query, 'dixitbackend')
+    console.log(req.body, req.query)
     let userreq = req.body
     let userquery = req.query
     if (userquery.otp === currentotp) {
@@ -196,11 +200,12 @@ router.put('/register', (req, res) => {
         };
         User.findOneAndUpdate(filter, updatevar, { new: true }, (err, user) => {
             if (err) { return console.error(err); }
-            res.status(200).send(user)
+            let message = 'User Updated Successfully'
+            res.status(200).send({user,message})
 
         })
     } else {
-        (res.status(400).send('otp is not valid'))
+        (res.status(400).send({message:'otp is not valid'}))
     }
 })
 router.post('/student-register', verifyToken, upload, (req, res) => {
@@ -217,7 +222,8 @@ router.post('/student-register', verifyToken, upload, (req, res) => {
         if (error) {
             console.log(error);
         } else {
-            res.status(200).send(registeredUser)
+            let message ="Student Registered Succesfully"
+            res.status(200).send({registeredUser,message})
         }
     })
 
@@ -329,6 +335,7 @@ router.get('/userDetails', verifyToken, (req, res) => {
     })
 })
 
+// user-register update api
 router.put('/userDetails',verifyToken, upload, (req, res) => {
     let sd = req.body
     const url = req.protocol + '://' + req.get("host");
@@ -343,12 +350,13 @@ router.put('/userDetails',verifyToken, upload, (req, res) => {
     // console.log(filter, req.body, req.body.firstName)
     User.findByIdAndUpdate({ _id:currentUser }, updatevar, { new: true }, (err, user) => {
         if (err) { return console.error(err); }
-        res.send(user)
+        let message = "User Updated Successfully"
+        res.send(user,message)
     })
 
 })
-// student-register update api
 
+// student-register update api
 router.put('/student-register', verifyToken, upload, (req, res) => {
     let sd = req.body
     const url = req.protocol + '://' + req.get("host");
@@ -368,8 +376,9 @@ router.put('/student-register', verifyToken, upload, (req, res) => {
     let filter = { _id: req.query._id, };
     // console.log(filter, req.body, req.body.firstName)
     Student.findByIdAndUpdate(filter, updatevar, { new: true }, (err, student) => {
-        if (err) { return console.error(err); }
-        res.send(student)
+        if (err) {console.error(err); }
+        let message = "Student Updated Successfully"
+        res.send(student,message)
 
     })
 

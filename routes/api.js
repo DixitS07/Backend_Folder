@@ -150,7 +150,7 @@ router.post('/login', (req, res) => {
                 const match = await bcrypt.compare(userData.password, user.password)
                 console.log(match)
                 if (match) {
-                    let message = 'Login Successfull' 
+                    let message = 'Login Success' 
                     let payload = { subject: user._id }
                     let token = jwt.sign(payload, 'secretKey', { expiresIn: '3600s' })
                     res.status(200).send({ token, user, message })
@@ -386,7 +386,7 @@ router.put('/student-register', verifyToken, upload, (req, res) => {
             res.status(500).send({message:"Can't Update ! Please try again"})
          }
         let message = "Student Updated Successfully"
-        res.send(student,message)
+        res.send({student,message})
 
     })
 
@@ -397,7 +397,8 @@ router.delete('/student-register', verifyToken, (req, res, next) => {
     // console.log(paramvar)
     Student.findOneAndRemove({ _id: req.query._id }, (err, student) => {
         if (err) res.status(500).json({ message: err });
-        res.status(200).send(student,{message:"Student Deleted Successfully"});
+        let message="Student Deleted Successfully"
+        res.status(200).send({student,message});
     });
 });
 

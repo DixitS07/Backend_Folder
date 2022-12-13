@@ -165,13 +165,13 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/reset-password', (req, res) => {
-    console.log(req.body, 'chetan Sir')
+    console.log(req.body, 'req body reset api')
     let userData = req.body
-    var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
-    console.log(otptoken)
     User.find({ email: userData.email })
         .then(result => {
             if (result.length) {
+                var otptoken = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
+                console.log(otptoken)
                 sendEmail(userData.email, 'OTP Verification', `your otp is ${otptoken}`,)
                 if (sendEmail) {
                     currentotp = otptoken
@@ -200,12 +200,12 @@ router.put('/register', (req, res) => {
         };
         User.findOneAndUpdate(filter, updatevar, { new: true }, (err, user) => {
             if (err) { return console.error(err); }
-            let message = 'User Updated Successfully'
+            let message = 'Password Changed Successfully'
             res.status(200).send({user,message})
 
         })
     } else {
-        (res.status(400).send({message:'otp is not valid'}))
+        (res.status(400).send({message:'OTP Is Not Valid'}))
     }
 })
 router.post('/student-register', verifyToken, upload, (req, res) => {
@@ -220,7 +220,8 @@ router.post('/student-register', verifyToken, upload, (req, res) => {
     newstudent.userId = currentUser
     newstudent.save((error, registeredUser) => {
         if (error) {
-            console.log(error);
+            console.log(error)
+            res.status(500).send({message:"Can't Register ! Please Try Again"})
         } else {
             let message ="Student Registered Succesfully"
             res.status(200).send({registeredUser,message})
@@ -343,15 +344,19 @@ router.put('/userDetails',verifyToken, upload, (req, res) => {
     let updatevar = {
         firstName: sd.firstName,
         lastName: sd.lastName,
+        email:sd.email
     };
     if (req.file) {
         updatevar.photo = url + '/' + req.file.filename
     }
     // console.log(filter, req.body, req.body.firstName)
     User.findByIdAndUpdate({ _id:currentUser }, updatevar, { new: true }, (err, user) => {
-        if (err) { return console.error(err); }
+        if (err) { 
+            console.error(err)
+            res.status(500).send({message:"Can't Update ! please try again"}) 
+        }
         let message = "User Updated Successfully"
-        res.send(user,message)
+        res.send({user,message})
     })
 
 })
@@ -376,7 +381,10 @@ router.put('/student-register', verifyToken, upload, (req, res) => {
     let filter = { _id: req.query._id, };
     // console.log(filter, req.body, req.body.firstName)
     Student.findByIdAndUpdate(filter, updatevar, { new: true }, (err, student) => {
-        if (err) {console.error(err); }
+        if (err) {
+            console.error(err)
+            res.status(500).send({message:"Can't Update ! Please try again"})
+         }
         let message = "Student Updated Successfully"
         res.send(student,message)
 
@@ -388,19 +396,17 @@ router.delete('/student-register', verifyToken, (req, res, next) => {
     // paramvar = req.query._id
     // console.log(paramvar)
     Student.findOneAndRemove({ _id: req.query._id }, (err, student) => {
-        if (err)
-            res.status(500).json({ errmsg: err });
-        res.status(200).json({ msg: student });
-
+        if (err) res.status(500).json({ message: err });
+        res.status(200).send(student,{message:"Student Deleted Successfully"});
     });
 });
 
 
 router.post('/deleteAccount', verifyToken, (req, res) => {
     userData = req.body;
-    // if (!userData.password) {
-    //     return res.status(400).json({ message: "please enter password" })
-    // }
+    if (!userData.password) {
+        return res.status(400).json({ message: "please enter password" })
+    }
     User.findOne({ _id: currentUser}, async (error, user) => {
         if (error) console.log(error)
         else {
@@ -408,13 +414,13 @@ router.post('/deleteAccount', verifyToken, (req, res) => {
             const isMatch = await bcrypt.compare(userData.password, user.password) 
             console.log(isMatch)
             if (!isMatch) {
-                res.status(400).json({ message: "Invalid Password" })
+                res.status(400).json({ message: "Password Does NOt Match" })
  
             } else {
                 User.deleteOne({ _id: user._id }, (err, docs) => {
                     if (err) console.log(err)
                     else {
-                        res.status(200).json({ message: "user have been deleted successfully.." })
+                        res.status(200).json({ message: "User Have Been Deleted Successfully" })
                         console.log(docs)
                     }
                 });

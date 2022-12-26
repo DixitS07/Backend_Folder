@@ -91,10 +91,10 @@ function otpverify(req, res, next) {
     if (sendEmail) {
         currentotp = otptoken
         console.log(currentotp, 'from current otp')
-        res.status(200).send('email is sent successfully')
+        res.status(200).send('OTP sent on email successfully')
         next()
     } else {
-        res.status(400).send("email is not sent")
+        res.status(400).send("OTP is not sent")
         next()
     }
 } 
@@ -188,7 +188,7 @@ router.post('/reset-password', (req, res) => {
 
 })
 
-router.put('/register', (req, res) => {
+router.put('/register', genHash,(req, res) => {
     console.log(req.body, req.query)
     let userreq = req.body
     let userquery = req.query
@@ -321,13 +321,18 @@ router.get('/special', verifyToken, (req, res) => {
     res.json(events)
 })
 
-router.get('/studentList', verifyToken, (req, res) => {
-    Student.find(function (err, result) {
-        if (err) { return console.error(err) }
-        res.json(result.filter(result => result.userId === currentUser));
-        // console.log(result)
+router.get('/studentList', verifyToken, async (req, res) => {
+    // Student.find(function (err, result) {
+    //     if (err) { return console.error(err) }
+    //     res.json(result.filter(result => result.userId === currentUser));
+    let agg = await Student.aggregate([
+        {$match : {userId:currentUser}},
+        {$project : {__v:0,password:0,userId:0}}
+    ])
+    // console.log(agg)
+    res.status(200).send(agg)
     })
-})
+
 router.get('/userDetails', verifyToken, (req, res) => {
     User.findOne({_id:currentUser}, (err, result) =>{
         if (err) { return console.error(err) }
